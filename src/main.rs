@@ -1,4 +1,7 @@
-#[derive(Clone)]
+use config::{Config, File, FileFormat};
+use serde::Deserialize;
+
+#[derive(Clone, Deserialize)]
 struct Vector3 {
     x: f64,
     y: f64,
@@ -31,6 +34,7 @@ impl Vector3 {
     }
 }
 
+#[derive(Deserialize)]
 struct Body {
     mass: f64,
     position: Vector3,
@@ -139,55 +143,27 @@ impl Universe {
     }
 }
 
-fn create_universe() -> Universe {
+fn load_config(filename: &str) -> Config {
+    Config::builder()
+        .add_source(File::new(filename, FileFormat::Yaml))
+        .build()
+        .expect("Configuration is valid")
+}
+
+fn create_universe(config: Config) -> Universe {
+    let universe_cfg = config.get_table("universe").unwrap();
     Universe {
         time: 0.0,
-        bodies: vec![
-            Body {
-                mass: 1.0,
-                position: Vector3 {
-                    x: 1.0,
-                    y: 0.0,
-                    z: 0.0,
-                },
-                velocity: Vector3 {
-                    x: 0.0,
-                    y: 1.0,
-                    z: 0.0,
-                },
-            },
-            Body {
-                mass: 1.0,
-                position: Vector3 {
-                    x: -1.0,
-                    y: 0.0,
-                    z: 0.0,
-                },
-                velocity: Vector3 {
-                    x: 0.0,
-                    y: -1.0,
-                    z: 0.0,
-                },
-            },
-            Body {
-                mass: 1.0,
-                position: Vector3 {
-                    x: 0.0,
-                    y: -3.0,
-                    z: 0.0,
-                },
-                velocity: Vector3 {
-                    x: 1.0,
-                    y: 0.0,
-                    z: 0.0,
-                },
-            },
-        ],
+        bodies: universe_cfg["bodies"]
+            .clone()
+            .try_deserialize::<Vec<Body>>()
+            .unwrap(),
     }
 }
 
 fn main() {
-    let mut universe = create_universe();
+    let config = load_config("config.yaml");
+    let mut universe = create_universe(config);
     println!("{}", universe.to_string());
     for _ in 0..10 {
         universe = universe.tick();
