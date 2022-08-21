@@ -2,7 +2,7 @@
 struct Vector3 {
     x: f64,
     y: f64,
-    z: f64
+    z: f64,
 }
 
 impl Vector3 {
@@ -14,7 +14,7 @@ impl Vector3 {
 struct Body {
     mass: f64,
     position: Vector3,
-    velocity: Vector3
+    velocity: Vector3,
 }
 
 impl Body {
@@ -23,8 +23,9 @@ impl Body {
         let momentum = Vector3 {
             x: self.velocity.x * self.mass,
             y: self.velocity.y * self.mass,
-            z: self.velocity.z * self.mass
-        }.to_string();
+            z: self.velocity.z * self.mass,
+        }
+        .to_string();
         format!("[{} {}]", position, momentum)
     }
 
@@ -34,24 +35,21 @@ impl Body {
             position: Vector3 {
                 x: self.position.x + self.velocity.x * step,
                 y: self.position.y + self.velocity.y * step,
-                z: self.position.z + self.velocity.z * step
+                z: self.position.z + self.velocity.z * step,
             },
-            velocity: self.velocity.clone()
+            velocity: self.velocity.clone(),
         }
     }
 }
 
 struct Universe {
     time: f64,
-    bodies: Vec<Body>
+    bodies: Vec<Body>,
 }
 
 impl Universe {
     fn to_string(&self) -> String {
-        let bodies: Vec<String> = self.bodies
-                .iter()
-                .map(|x| x.to_string())
-                .collect();
+        let bodies: Vec<String> = self.bodies.iter().map(|x| x.to_string()).collect();
         format!("{}: {{{}}}", self.time, bodies.join(" "))
     }
 
@@ -59,7 +57,7 @@ impl Universe {
         const STEP: f64 = 0.5;
         Universe {
             time: self.time + STEP,
-            bodies: self.bodies.iter().map(|b| b.tick(STEP)).collect()
+            bodies: self.bodies.iter().map(|b| b.tick(STEP)).collect(),
         }
     }
 }
@@ -70,15 +68,31 @@ fn create_universe() -> Universe {
         bodies: vec![
             Body {
                 mass: 1.0,
-                position: Vector3 { x: 1.0, y: 0.0, z: 0.0 },
-                velocity: Vector3 { x: 0.0, y: 1.0, z: 0.0 }
+                position: Vector3 {
+                    x: 1.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                velocity: Vector3 {
+                    x: 0.0,
+                    y: 1.0,
+                    z: 0.0,
+                },
             },
             Body {
                 mass: 1.0,
-                position: Vector3 { x: -1.0, y: 0.0, z: 0.0 },
-                velocity: Vector3 { x: 0.0, y: -1.0, z: 0.0 }
-            }
-        ]
+                position: Vector3 {
+                    x: -1.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                velocity: Vector3 {
+                    x: 0.0,
+                    y: -1.0,
+                    z: 0.0,
+                },
+            },
+        ],
     }
 }
 
