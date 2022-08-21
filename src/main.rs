@@ -1,3 +1,4 @@
+#[derive(Clone)]
 struct Vector3 {
     x: f32,
     y: f32,
@@ -10,6 +11,7 @@ impl Vector3 {
     }
 }
 
+#[derive(Clone)]
 struct Body {
     mass: f32,
     position: Vector3,
@@ -42,8 +44,11 @@ impl Universe {
         format!("{}: {{{}}}", self.time, bodies.join(" "))
     }
 
-    fn tick(&mut self) {
-        self.time += 1.0;
+    fn tick(&self) -> Universe {
+        Universe {
+            time: self.time + 1.0,
+            bodies: self.bodies.clone()
+        }
     }
 }
 
@@ -69,7 +74,7 @@ fn main() {
     let mut universe = create_universe();
     println!("{}", universe.to_string());
     for _ in 0..20 {
-        universe.tick();
+        universe = universe.tick();
         println!("{}", universe.to_string());
     }
 }
