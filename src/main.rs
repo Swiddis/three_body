@@ -7,7 +7,7 @@ struct Vector3 {
 
 impl Vector3 {
     fn to_string(&self) -> String {
-        format!("<{:.3}, {:.3}, {:.3}>", self.x, self.y, self.z)
+        format!("<{:.3} {:.3} {:.3}>", self.x, self.y, self.z)
     }
 
     fn add(&self, v: &Vector3) -> Vector3 {
