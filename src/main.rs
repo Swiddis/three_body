@@ -93,9 +93,9 @@ impl Body {
             mass: self.mass,
             position: self.position.clone(),
             velocity: Vector3 {
-                x: self.velocity.x + force.x / self.mass * step,
-                y: self.velocity.y + force.y / self.mass * step,
-                z: self.velocity.z + force.z / self.mass * step,
+                x: self.velocity.x - force.x / self.mass * step,
+                y: self.velocity.y - force.y / self.mass * step,
+                z: self.velocity.z - force.z / self.mass * step,
             },
         };
     }
