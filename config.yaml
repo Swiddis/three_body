@@ -1,34 +1,33 @@
 constants:
-  time_step: 0.1
-  duration: 1.0
+  time_step: 0.01
 
 universe:
   grav_const: 1.0
   bodies:
     - mass: 1.0
       position:
-        x: 1.0
-        y: 0.0
+        x: -2.0
+        y: -1.5
         z: 0.0
       velocity:
         x: 0.0
-        y: 1.0
-        z: 0.0
+        y: 0.0
+        z: 0.2
     - mass: 1.0
       position:
-        x: -1.0
-        y: 0.0
+        x: -2.0
+        y: 1.5
         z: 0.0
       velocity:
         x: 0.0
-        y: -1.0
-        z: 0.0
+        y: 0.0
+        z: -0.1
     - mass: 1.0
       position:
-        x: 0.0
-        y: -2.0
+        x: 2.0
+        y: -1.5
         z: 0.0
       velocity:
-        x: 0.5
+        x: 0.0
         y: 0.0
-        z: 0.0
+        z: -0.1

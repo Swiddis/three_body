@@ -2,14 +2,18 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize)]
 pub struct Vector3 {
-    x: f64,
-    y: f64,
-    z: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl Vector3 {
     pub fn to_string(&self) -> String {
         format!("<{:.3} {:.3} {:.3}>", self.x, self.y, self.z)
+    }
+
+    pub fn as_vec(&self) -> Vec<f64> {
+        vec![self.x, self.y, self.z]
     }
 
     fn add(&self, v: &Vector3) -> Vector3 {
@@ -35,9 +39,9 @@ impl Vector3 {
 
 #[derive(Deserialize)]
 pub struct Body {
-    mass: f64,
-    position: Vector3,
-    velocity: Vector3,
+    pub mass: f64,
+    pub position: Vector3,
+    pub velocity: Vector3,
 }
 
 impl Body {
@@ -67,7 +71,7 @@ impl Body {
     fn force_vector(&self, body: &Body, grav: f64) -> Vector3 {
         let d = self.position.sub(&body.position);
         let r = d.norm();
-        if r == 0.0 {
+        if r <= 0.001 {
             Vector3 {
                 x: 0.0,
                 y: 0.0,
