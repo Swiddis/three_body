@@ -11,7 +11,6 @@ impl Vector3 {
     }
 }
 
-#[derive(Clone)]
 struct Body {
     mass: f32,
     position: Vector3,
