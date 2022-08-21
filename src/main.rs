@@ -156,7 +156,7 @@ fn create_universe(config: Config) -> Universe {
         time: 0.0,
         bodies: universe_cfg["bodies"]
             .clone()
-            .try_deserialize::<Vec<Body>>()
+            .try_deserialize()
             .unwrap(),
     }
 }
