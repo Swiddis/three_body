@@ -160,8 +160,8 @@ fn load_config(filename: &str) -> Config {
 
 fn load_constants(config: HashMap<String, Value>) -> Constants {
     Constants {
-        time_step: config["time_step"].clone().into_float().unwrap(),
-        duration: config["duration"].clone().into_float().unwrap(),
+        time_step: config["time_step"].clone().try_deserialize().unwrap(),
+        duration: config["duration"].clone().try_deserialize().unwrap(),
     }
 }
 
