@@ -7,7 +7,7 @@ struct Vector3 {
 
 impl Vector3 {
     fn to_string(&self) -> String {
-        format!("<{}, {}, {}>", self.x, self.y, self.z)
+        format!("<{:.3}, {:.3}, {:.3}>", self.x, self.y, self.z)
     }
 
     fn add(&self, v: &Vector3) -> Vector3 {
@@ -103,11 +103,11 @@ struct Universe {
 impl Universe {
     fn to_string(&self) -> String {
         let bodies: Vec<String> = self.bodies.iter().map(|x| x.to_string()).collect();
-        format!("{}: {{{}}}", self.time, bodies.join(" "))
+        format!("{:.3}: {{{}}}", self.time, bodies.join(" "))
     }
 
     fn tick(&self) -> Universe {
-        const STEP: f64 = 0.5;
+        const STEP: f64 = 0.001;
         let forces = self.force_vectors();
         Universe {
             time: self.time + STEP,
@@ -171,7 +171,7 @@ fn create_universe() -> Universe {
 fn main() {
     let mut universe = create_universe();
     println!("{}", universe.to_string());
-    for _ in 0..2 {
+    for _ in 0..10 {
         universe = universe.tick();
         println!("{}", universe.to_string());
     }
