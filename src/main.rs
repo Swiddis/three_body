@@ -28,6 +28,14 @@ impl Body {
         }.to_string();
         format!("[{} {}]", position, momentum)
     }
+
+    fn tick(&self) -> Body {
+        Body {
+            mass: self.mass,
+            position: self.position.clone(),
+            velocity: self.velocity.clone()
+        }
+    }
 }
 
 struct Universe {
@@ -47,7 +55,7 @@ impl Universe {
     fn tick(&self) -> Universe {
         Universe {
             time: self.time + 1.0,
-            bodies: self.bodies.clone()
+            bodies: self.bodies.iter().map(|b| b.tick()).collect()
         }
     }
 }
@@ -73,7 +81,7 @@ fn create_universe() -> Universe {
 fn main() {
     let mut universe = create_universe();
     println!("{}", universe.to_string());
-    for _ in 0..1 {
+    for _ in 0..2 {
         universe = universe.tick();
         println!("{}", universe.to_string());
     }
