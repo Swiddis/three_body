@@ -73,7 +73,7 @@ fn create_universe() -> Universe {
 fn main() {
     let mut universe = create_universe();
     println!("{}", universe.to_string());
-    for _ in 0..20 {
+    for _ in 0..1 {
         universe = universe.tick();
         println!("{}", universe.to_string());
     }
