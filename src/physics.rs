@@ -71,20 +71,19 @@ impl Body {
     fn force_vector(&self, body: &Body, grav: f64) -> Vector3 {
         let d = self.position.sub(&body.position);
         let r = d.norm();
-        if r <= 0.001 {
-            Vector3 {
+        if r <= 0.00001 {
+            return Vector3 {
                 x: 0.0,
                 y: 0.0,
-                z: 0.0,
+                z: 0.0
             }
-        } else {
-            let d_sum = d.x.abs() + d.y.abs() + d.z.abs();
-            let f_g = grav * self.mass * body.mass / (r * r);
-            Vector3 {
-                x: -f_g * d.x / d_sum,
-                y: -f_g * d.y / d_sum,
-                z: -f_g * d.z / d_sum,
-            }
+        }
+        let d_sum = d.x.abs() + d.y.abs() + d.z.abs();
+        let f_g = grav * self.mass * body.mass / (r * r);
+        Vector3 {
+            x: -f_g * d.x / d_sum,
+            y: -f_g * d.y / d_sum,
+            z: -f_g * d.z / d_sum,
         }
     }
 

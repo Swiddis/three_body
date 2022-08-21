@@ -1,5 +1,5 @@
 constants:
-  time_step: 0.001
+  time_step: 0.05
 
 universe:
   grav_const: 1.0
