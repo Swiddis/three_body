@@ -1,4 +1,6 @@
-use config::{Config, File, FileFormat};
+use std::collections::HashMap;
+
+use config::{Config, File, FileFormat, Value};
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize)]
@@ -111,7 +113,7 @@ impl Universe {
     }
 
     fn tick(&self) -> Universe {
-        const STEP: f64 = 0.001;
+        const STEP: f64 = 0.1;
         let forces = self.force_vectors();
         Universe {
             time: self.time + STEP,
@@ -150,22 +152,21 @@ fn load_config(filename: &str) -> Config {
         .expect("Configuration is valid")
 }
 
-fn create_universe(config: Config) -> Universe {
-    let universe_cfg = config.get_table("universe").unwrap();
+fn create_universe(config: HashMap<String, Value>) -> Universe {
     Universe {
         time: 0.0,
-        bodies: universe_cfg["bodies"]
-            .clone()
-            .try_deserialize()
-            .unwrap(),
+        bodies: config["bodies"].clone().try_deserialize().unwrap(),
     }
 }
 
 fn main() {
     let config = load_config("config.yaml");
-    let mut universe = create_universe(config);
+    let mut universe = create_universe(config.get_table("universe").unwrap());
+    let constants = config.get_table("constants").unwrap();
+    let steps = (constants["duration"].clone().into_float().unwrap()
+        / constants["time_step"].clone().into_float().unwrap()) as i32;
     println!("{}", universe.to_string());
-    for _ in 0..10 {
+    for _ in 0..steps {
         universe = universe.tick();
         println!("{}", universe.to_string());
     }
