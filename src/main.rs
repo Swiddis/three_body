@@ -1,8 +1,8 @@
 #[derive(Clone)]
 struct Vector3 {
-    x: f32,
-    y: f32,
-    z: f32
+    x: f64,
+    y: f64,
+    z: f64
 }
 
 impl Vector3 {
@@ -12,7 +12,7 @@ impl Vector3 {
 }
 
 struct Body {
-    mass: f32,
+    mass: f64,
     position: Vector3,
     velocity: Vector3
 }
@@ -28,17 +28,21 @@ impl Body {
         format!("[{} {}]", position, momentum)
     }
 
-    fn tick(&self) -> Body {
+    fn tick(&self, step: f64) -> Body {
         Body {
             mass: self.mass,
-            position: self.position.clone(),
+            position: Vector3 {
+                x: self.position.x + self.velocity.x * step,
+                y: self.position.y + self.velocity.y * step,
+                z: self.position.z + self.velocity.z * step
+            },
             velocity: self.velocity.clone()
         }
     }
 }
 
 struct Universe {
-    time: f32,
+    time: f64,
     bodies: Vec<Body>
 }
 
@@ -52,9 +56,10 @@ impl Universe {
     }
 
     fn tick(&self) -> Universe {
+        const STEP: f64 = 0.5;
         Universe {
-            time: self.time + 1.0,
-            bodies: self.bodies.iter().map(|b| b.tick()).collect()
+            time: self.time + STEP,
+            bodies: self.bodies.iter().map(|b| b.tick(STEP)).collect()
         }
     }
 }
