@@ -14,7 +14,7 @@ impl Vector3 {
         Vector3 {
             x: self.x + v.x,
             y: self.y + v.y,
-            z: self.z + v.z
+            z: self.z + v.z,
         }
     }
 
@@ -22,7 +22,7 @@ impl Vector3 {
         Vector3 {
             x: self.x - v.x,
             y: self.y - v.y,
-            z: self.z - v.z
+            z: self.z - v.z,
         }
     }
 
@@ -69,7 +69,7 @@ impl Body {
             Vector3 {
                 x: 0.0,
                 y: 0.0,
-                z: 0.0
+                z: 0.0,
             }
         } else {
             let d_sum = d.x.abs() + d.y.abs() + d.z.abs();
@@ -77,7 +77,7 @@ impl Body {
             Vector3 {
                 x: f_g * d.x / d_sum,
                 y: f_g * d.y / d_sum,
-                z: f_g * d.z / d_sum
+                z: f_g * d.z / d_sum,
             }
         }
     }
@@ -89,9 +89,9 @@ impl Body {
             velocity: Vector3 {
                 x: self.velocity.x + force.x / self.mass * step,
                 y: self.velocity.y + force.y / self.mass * step,
-                z: self.velocity.z + force.z / self.mass * step
-            }
-        }
+                z: self.velocity.z + force.z / self.mass * step,
+            },
+        };
     }
 }
 
@@ -111,20 +111,25 @@ impl Universe {
         let forces = self.force_vectors();
         Universe {
             time: self.time + STEP,
-            bodies: self.bodies.iter()
+            bodies: self
+                .bodies
+                .iter()
                 .enumerate()
                 .map(|(i, b)| b.accelerate(&forces[i], STEP).tick(STEP))
-                .collect()
+                .collect(),
         }
     }
-    
+
     fn force_vectors(&self) -> Vec<Vector3> {
-        let mut forces: Vec<Vector3> = self.bodies.iter()
+        let mut forces: Vec<Vector3> = self
+            .bodies
+            .iter()
             .map(|_| Vector3 {
                 x: 0.0,
                 y: 0.0,
-                z: 0.0
-            }).collect();
+                z: 0.0,
+            })
+            .collect();
         for (i, a) in self.bodies.iter().enumerate() {
             for b in self.bodies.iter() {
                 forces[i] = forces[i].add(&a.force_vector(b));
@@ -161,6 +166,19 @@ fn create_universe() -> Universe {
                 velocity: Vector3 {
                     x: 0.0,
                     y: -1.0,
+                    z: 0.0,
+                },
+            },
+            Body {
+                mass: 1.0,
+                position: Vector3 {
+                    x: 0.0,
+                    y: -3.0,
+                    z: 0.0,
+                },
+                velocity: Vector3 {
+                    x: 1.0,
+                    y: 0.0,
                     z: 0.0,
                 },
             },
