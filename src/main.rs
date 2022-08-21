@@ -3,6 +3,12 @@ use std::collections::HashMap;
 use config::{Config, File, FileFormat, Value};
 use serde::Deserialize;
 
+#[derive(Deserialize)]
+struct Constants {
+    time_step: f64,
+    duration: f64,
+}
+
 #[derive(Clone, Deserialize)]
 struct Vector3 {
     x: f64,
@@ -67,8 +73,7 @@ impl Body {
         }
     }
 
-    fn force_vector(&self, body: &Body) -> Vector3 {
-        const G: f64 = 1.0;
+    fn force_vector(&self, body: &Body, grav: f64) -> Vector3 {
         let d = self.position.sub(&body.position);
         let r = d.norm();
         if r == 0.0 {
@@ -79,11 +84,11 @@ impl Body {
             }
         } else {
             let d_sum = d.x.abs() + d.y.abs() + d.z.abs();
-            let f_g = G * self.mass * body.mass / (r * r);
+            let f_g = grav * self.mass * body.mass / (r * r);
             Vector3 {
-                x: f_g * d.x / d_sum,
-                y: f_g * d.y / d_sum,
-                z: f_g * d.z / d_sum,
+                x: -f_g * d.x / d_sum,
+                y: -f_g * d.y / d_sum,
+                z: -f_g * d.z / d_sum,
             }
         }
     }
@@ -93,15 +98,16 @@ impl Body {
             mass: self.mass,
             position: self.position.clone(),
             velocity: Vector3 {
-                x: self.velocity.x - force.x / self.mass * step,
-                y: self.velocity.y - force.y / self.mass * step,
-                z: self.velocity.z - force.z / self.mass * step,
+                x: self.velocity.x + force.x / self.mass * step,
+                y: self.velocity.y + force.y / self.mass * step,
+                z: self.velocity.z + force.z / self.mass * step,
             },
         };
     }
 }
 
 struct Universe {
+    grav_const: f64,
     time: f64,
     bodies: Vec<Body>,
 }
@@ -112,16 +118,16 @@ impl Universe {
         format!("{:.3}: {{{}}}", self.time, bodies.join(" "))
     }
 
-    fn tick(&self) -> Universe {
-        const STEP: f64 = 0.1;
+    fn tick(&self, step: f64) -> Universe {
         let forces = self.force_vectors();
         Universe {
-            time: self.time + STEP,
+            grav_const: self.grav_const,
+            time: self.time + step,
             bodies: self
                 .bodies
                 .iter()
                 .enumerate()
-                .map(|(i, b)| b.accelerate(&forces[i], STEP).tick(STEP))
+                .map(|(i, b)| b.accelerate(&forces[i], step).tick(step))
                 .collect(),
         }
     }
@@ -138,7 +144,7 @@ impl Universe {
             .collect();
         for (i, a) in self.bodies.iter().enumerate() {
             for b in self.bodies.iter() {
-                forces[i] = forces[i].add(&a.force_vector(b));
+                forces[i] = forces[i].add(&a.force_vector(b, self.grav_const));
             }
         }
         return forces;
@@ -152,22 +158,29 @@ fn load_config(filename: &str) -> Config {
         .expect("Configuration is valid")
 }
 
+fn load_constants(config: HashMap<String, Value>) -> Constants {
+    Constants {
+        time_step: config["time_step"].clone().into_float().unwrap(),
+        duration: config["duration"].clone().into_float().unwrap(),
+    }
+}
+
 fn create_universe(config: HashMap<String, Value>) -> Universe {
     Universe {
         time: 0.0,
+        grav_const: config["grav_const"].clone().try_deserialize().unwrap(),
         bodies: config["bodies"].clone().try_deserialize().unwrap(),
     }
 }
 
 fn main() {
     let config = load_config("config.yaml");
+    let constants = load_constants(config.get_table("constants").unwrap());
     let mut universe = create_universe(config.get_table("universe").unwrap());
-    let constants = config.get_table("constants").unwrap();
-    let steps = (constants["duration"].clone().into_float().unwrap()
-        / constants["time_step"].clone().into_float().unwrap()) as i32;
+    let steps = (constants.duration / constants.time_step) as i32;
     println!("{}", universe.to_string());
     for _ in 0..steps {
-        universe = universe.tick();
+        universe = universe.tick(constants.time_step);
         println!("{}", universe.to_string());
     }
 }

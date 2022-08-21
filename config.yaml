@@ -1,9 +1,9 @@
 constants:
   time_step: 0.1
-  grav_const: 1.0
   duration: 1.0
 
 universe:
+  grav_const: 1.0
   bodies:
     - mass: 1.0
       position:
