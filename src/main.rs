@@ -1,4 +1,5 @@
 mod config;
+mod graphics;
 mod physics;
 
 use crate::config::load_config;

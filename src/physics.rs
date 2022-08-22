@@ -1,7 +1,10 @@
-use rapier3d_f64::prelude::*;
 use std::f64::consts::PI;
 
+use rapier3d_f64::prelude::*;
+use kiss3d::nalgebra::Translation3;
+
 use crate::config::{ThreeBodyConfig, Body};
+use crate::graphics::init;
 
 struct PhysicsBody {
     handle: RigidBodyHandle,
@@ -31,7 +34,7 @@ fn get_bodies(rigid_body_set: &RigidBodySet) -> Vec<PhysicsBody> {
     }).collect()
 }
 
-fn calculate_forces(rigid_body_set: &mut RigidBodySet) {
+fn calculate_forces(rigid_body_set: &mut RigidBodySet, grav_const: &f64) {
     let bodies = get_bodies(rigid_body_set);
     for body in rigid_body_set.iter_mut() {
         body.1.reset_forces(true);
@@ -40,7 +43,7 @@ fn calculate_forces(rigid_body_set: &mut RigidBodySet) {
                 continue;
             }
             let dsp = body.1.translation() - p_body.translation;
-            let f_grav = p_body.mass * body.1.mass() * dsp / dsp.norm().powf(3.0);
+            let f_grav = -grav_const * p_body.mass * body.1.mass() * dsp / dsp.norm().powf(3.0);
             body.1.add_force(f_grav, true);
         }
     }
@@ -63,8 +66,10 @@ pub fn do_physics(config: ThreeBodyConfig) {
     let mut ccd_solver = CCDSolver::new();
     let physics_hooks = ();
     let event_handler = ();
-    for _ in 0..200 {
-        calculate_forces(&mut rigid_body_set);
+
+    let (mut window, mut graphics) = init(&config.universe.bodies);
+    while window.render() {
+        calculate_forces(&mut rigid_body_set, &config.universe.grav_const);
         physics_pipeline.step(
             &gravity,
             &integration_parameters,
@@ -79,9 +84,14 @@ pub fn do_physics(config: ThreeBodyConfig) {
             &physics_hooks,
             &event_handler,
         );
-        println!("=================");
-        for body in rigid_body_set.iter() {
-            println!("{:?}", body.1.translation());
+
+        for (i, body) in rigid_body_set.iter().enumerate() {
+            let b_trans = body.1.position().translation.vector;
+            let b_trans: Vec<f32> = b_trans.iter().map(|f| *f as f32).collect();
+            let s_trans: Translation3<f32> = Translation3 {
+                vector: kiss3d::nalgebra::Vector3::new(b_trans[0], b_trans[1], b_trans[2])
+            };
+            graphics[i].sphere.set_local_translation(s_trans);
         }
     }
 }
