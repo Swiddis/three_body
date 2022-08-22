@@ -2,9 +2,9 @@ mod config;
 mod physics;
 
 use crate::config::load_config;
-use crate::physics::load_physics;
+use crate::physics::do_physics;
 
 fn main() {
     let config = load_config("config.yaml");
-    load_physics(config);
+    do_physics(config);
 }
