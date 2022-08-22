@@ -1,146 +1,54 @@
-use serde::Deserialize;
+use rapier3d_f64::prelude::*;
 
-#[derive(Clone, Deserialize)]
-pub struct Vector3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
-}
+use crate::config::ThreeBodyConfig;
 
-impl Vector3 {
-    pub fn to_string(&self) -> String {
-        format!("<{:.3} {:.3} {:.3}>", self.x, self.y, self.z)
-    }
+pub fn load_physics(_config: ThreeBodyConfig) {
+    let mut rigid_body_set = RigidBodySet::new();
+    let mut collider_set = ColliderSet::new();
 
-    pub fn as_vec(&self) -> Vec<f64> {
-        vec![self.x, self.y, self.z]
-    }
+    /* Create the ground. */
+    let collider = ColliderBuilder::cuboid(100.0, 0.1, 100.0).build();
+    collider_set.insert(collider);
 
-    fn add(&self, v: &Vector3) -> Vector3 {
-        Vector3 {
-            x: self.x + v.x,
-            y: self.y + v.y,
-            z: self.z + v.z,
-        }
-    }
+    /* Create the bounding ball. */
+    let rigid_body = RigidBodyBuilder::dynamic()
+        .translation(vector![0.0, 10.0, 0.0])
+        .build();
+    let collider = ColliderBuilder::ball(0.5).restitution(0.7).build();
+    let ball_body_handle = rigid_body_set.insert(rigid_body);
+    collider_set.insert_with_parent(collider, ball_body_handle, &mut rigid_body_set);
 
-    fn sub(&self, v: &Vector3) -> Vector3 {
-        Vector3 {
-            x: self.x - v.x,
-            y: self.y - v.y,
-            z: self.z - v.z,
-        }
-    }
+    /* Create other structures necessary for the simulation. */
+    let gravity = vector![0.0, -9.81, 0.0];
+    let integration_parameters = IntegrationParameters::default();
+    let mut physics_pipeline = PhysicsPipeline::new();
+    let mut island_manager = IslandManager::new();
+    let mut broad_phase = BroadPhase::new();
+    let mut narrow_phase = NarrowPhase::new();
+    let mut impulse_joint_set = ImpulseJointSet::new();
+    let mut multibody_joint_set = MultibodyJointSet::new();
+    let mut ccd_solver = CCDSolver::new();
+    let physics_hooks = ();
+    let event_handler = ();
 
-    fn norm(&self) -> f64 {
-        return (self.x * self.x + self.y * self.y + self.z * self.z).sqrt();
-    }
-}
+    /* Run the game loop, stepping the simulation once per frame. */
+    for _ in 0..200 {
+        physics_pipeline.step(
+            &gravity,
+            &integration_parameters,
+            &mut island_manager,
+            &mut broad_phase,
+            &mut narrow_phase,
+            &mut rigid_body_set,
+            &mut collider_set,
+            &mut impulse_joint_set,
+            &mut multibody_joint_set,
+            &mut ccd_solver,
+            &physics_hooks,
+            &event_handler,
+        );
 
-#[derive(Deserialize)]
-pub struct Body {
-    pub mass: f64,
-    pub position: Vector3,
-    pub velocity: Vector3,
-}
-
-impl Body {
-    pub fn to_string(&self) -> String {
-        let position = self.position.to_string();
-        let momentum = Vector3 {
-            x: self.velocity.x * self.mass,
-            y: self.velocity.y * self.mass,
-            z: self.velocity.z * self.mass,
-        }
-        .to_string();
-        format!("[{} {}]", position, momentum)
-    }
-
-    fn tick(&self, step: f64) -> Body {
-        Body {
-            mass: self.mass,
-            position: Vector3 {
-                x: self.position.x + self.velocity.x * step,
-                y: self.position.y + self.velocity.y * step,
-                z: self.position.z + self.velocity.z * step,
-            },
-            velocity: self.velocity.clone(),
-        }
-    }
-
-    fn force_vector(&self, body: &Body, grav: f64) -> Vector3 {
-        let d = self.position.sub(&body.position);
-        let r = d.norm();
-        if r <= 0.00001 {
-            return Vector3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0
-            }
-        }
-        let d_sum = d.x.abs() + d.y.abs() + d.z.abs();
-        let f_g = grav * self.mass * body.mass / (r * r);
-        Vector3 {
-            x: -f_g * d.x / d_sum,
-            y: -f_g * d.y / d_sum,
-            z: -f_g * d.z / d_sum,
-        }
-    }
-
-    fn accelerate(&self, force: &Vector3, step: f64) -> Body {
-        return Body {
-            mass: self.mass,
-            position: self.position.clone(),
-            velocity: Vector3 {
-                x: self.velocity.x + force.x / self.mass * step,
-                y: self.velocity.y + force.y / self.mass * step,
-                z: self.velocity.z + force.z / self.mass * step,
-            },
-        };
-    }
-}
-
-pub struct Universe {
-    pub grav_const: f64,
-    pub time: f64,
-    pub bodies: Vec<Body>,
-}
-
-impl Universe {
-    pub fn to_string(&self) -> String {
-        let bodies: Vec<String> = self.bodies.iter().map(|x| x.to_string()).collect();
-        format!("{:.3}: {{{}}}", self.time, bodies.join(" "))
-    }
-
-    pub fn tick(&self, step: f64) -> Universe {
-        let forces = self.force_vectors();
-        Universe {
-            grav_const: self.grav_const,
-            time: self.time + step,
-            bodies: self
-                .bodies
-                .iter()
-                .enumerate()
-                .map(|(i, b)| b.accelerate(&forces[i], step).tick(step))
-                .collect(),
-        }
-    }
-
-    fn force_vectors(&self) -> Vec<Vector3> {
-        let mut forces: Vec<Vector3> = self
-            .bodies
-            .iter()
-            .map(|_| Vector3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            })
-            .collect();
-        for (i, a) in self.bodies.iter().enumerate() {
-            for b in self.bodies.iter() {
-                forces[i] = forces[i].add(&a.force_vector(b, self.grav_const));
-            }
-        }
-        return forces;
+        let ball_body = &rigid_body_set[ball_body_handle];
+        println!("Ball altitude: {}", ball_body.translation().y);
     }
 }
