@@ -1,10 +1,5 @@
-use config::{Config, File, FileFormat};
+use config::{Config, ConfigError, File, FileFormat};
 use serde::Deserialize;
-
-#[derive(Deserialize)]
-pub struct Constants {
-    pub time_step: f64,
-}
 
 #[derive(Deserialize)]
 pub struct Vector3 {
@@ -28,16 +23,13 @@ pub struct Universe {
 
 #[derive(Deserialize)]
 pub struct ThreeBodyConfig {
-    pub constants: Constants,
     pub universe: Universe,
 }
 
-pub fn load_config(filename: &str) -> ThreeBodyConfig {
+pub fn load_config(filename: &str) -> Result<ThreeBodyConfig, ConfigError> {
     let config = Config::builder()
         .add_source(File::new(filename, FileFormat::Yaml))
-        .build()
-        .expect("Yaml is valid");
-    config
-        .try_deserialize::<ThreeBodyConfig>()
-        .expect("Configuration is valid")
+        .build()?;
+    return config
+        .try_deserialize::<ThreeBodyConfig>();
 }
