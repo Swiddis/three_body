@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 
-use rapier3d_f64::prelude::*;
 use kiss3d::window::Window;
+use rapier3d_f64::prelude::*;
 
 use crate::config::{Body, ThreeBodyConfig};
 use crate::graphics::{draw_bodies, init, GraphicsBody};
@@ -25,7 +25,7 @@ struct Physics {
     physics_hooks: (),
     event_handler: (),
     bodies: RigidBodySet,
-    colliders: ColliderSet
+    colliders: ColliderSet,
 }
 
 impl Physics {
@@ -43,7 +43,7 @@ impl Physics {
             physics_hooks: (),
             event_handler: (),
             bodies: rigid_body_set,
-            colliders: collider_set
+            colliders: collider_set,
         }
     }
 
