@@ -9,6 +9,5 @@ use crate::physics::do_simulation;
 
 fn main() -> Result<(), ConfigError> {
     let config = load_config("config.yaml")?;
-    do_simulation(config);
-    Ok(())
+    return do_simulation(config);
 }
