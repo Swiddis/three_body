@@ -84,6 +84,7 @@ fn add_bodies(
         let collider = ColliderBuilder::ball(radius)
             .restitution(1.0)
             .density(1.0)
+            .friction(0.0)
             .build();
         let handle = rigid_body_set.insert(rigid_body);
         collider_set.insert_with_parent(collider, handle, rigid_body_set);
