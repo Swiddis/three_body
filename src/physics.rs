@@ -11,6 +11,59 @@ struct PhysicsBody {
     translation: Vector<Real>,
 }
 
+struct Physics {
+    gravity: Vector<f64>,
+    integration_parameters: IntegrationParameters,
+    physics_pipeline: PhysicsPipeline,
+    island_manager: IslandManager,
+    broad_phase: BroadPhase,
+    narrow_phase: NarrowPhase,
+    impulse_joint_set: ImpulseJointSet,
+    multibody_joint_set: MultibodyJointSet,
+    ccd_solver: CCDSolver,
+    physics_hooks: (),
+    event_handler: (),
+    bodies: RigidBodySet,
+    colliders: ColliderSet
+}
+
+impl Physics {
+    fn new(rigid_body_set: RigidBodySet, collider_set: ColliderSet) -> Self {
+        Self {
+            gravity: vector![0.0, 0.0, 0.0],
+            integration_parameters: IntegrationParameters::default(),
+            physics_pipeline: PhysicsPipeline::new(),
+            island_manager: IslandManager::new(),
+            broad_phase: BroadPhase::new(),
+            narrow_phase: NarrowPhase::new(),
+            impulse_joint_set: ImpulseJointSet::new(),
+            multibody_joint_set: MultibodyJointSet::new(),
+            ccd_solver: CCDSolver::new(),
+            physics_hooks: (),
+            event_handler: (),
+            bodies: rigid_body_set,
+            colliders: collider_set
+        }
+    }
+
+    fn step(&mut self) {
+        self.physics_pipeline.step(
+            &self.gravity,
+            &self.integration_parameters,
+            &mut self.island_manager,
+            &mut self.broad_phase,
+            &mut self.narrow_phase,
+            &mut self.bodies,
+            &mut self.colliders,
+            &mut self.impulse_joint_set,
+            &mut self.multibody_joint_set,
+            &mut self.ccd_solver,
+            &self.physics_hooks,
+            &self.event_handler,
+        );
+    }
+}
+
 fn add_bodies(
     rigid_body_set: &mut RigidBodySet,
     collider_set: &mut ColliderSet,
@@ -68,36 +121,13 @@ pub fn do_physics(config: ThreeBodyConfig) {
         &config.universe.bodies,
     );
 
-    let gravity = vector![0.0, 0.0, 0.0];
-    let integration_parameters = IntegrationParameters::default();
-    let mut physics_pipeline = PhysicsPipeline::new();
-    let mut island_manager = IslandManager::new();
-    let mut broad_phase = BroadPhase::new();
-    let mut narrow_phase = NarrowPhase::new();
-    let mut impulse_joint_set = ImpulseJointSet::new();
-    let mut multibody_joint_set = MultibodyJointSet::new();
-    let mut ccd_solver = CCDSolver::new();
-    let physics_hooks = ();
-    let event_handler = ();
+    let mut physics = Physics::new(rigid_body_set, collider_set);
 
     let (mut window, mut graphics) = init(&config.universe.bodies);
 
     while window.render() {
-        calculate_forces(&mut rigid_body_set, &config.universe.grav_const);
-        physics_pipeline.step(
-            &gravity,
-            &integration_parameters,
-            &mut island_manager,
-            &mut broad_phase,
-            &mut narrow_phase,
-            &mut rigid_body_set,
-            &mut collider_set,
-            &mut impulse_joint_set,
-            &mut multibody_joint_set,
-            &mut ccd_solver,
-            &physics_hooks,
-            &event_handler,
-        );
-        draw_bodies(&rigid_body_set, &mut graphics);
+        calculate_forces(&mut physics.bodies, &config.universe.grav_const);
+        physics.step();
+        draw_bodies(&physics.bodies, &mut graphics);
     }
 }
