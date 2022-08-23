@@ -1938,7 +1938,7 @@ dependencies = [
 
 [[package]]
 name = "three_body"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "config",
  "kiss3d",
