@@ -6,8 +6,13 @@
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
 Yet another three-body simulation in Rust.
-Built with Rapier3d for physics, Parry3d for collision handling, and Kiss3d for graphics.
-A neat unique thing here is that collisions are handled elastically.
+Built with:
+
+- [Kiss3d](https://crates.io/crates/kiss3d) for graphics
+- [Rapier](https://rapier.rs/) for physics
+- [Parry](https://parry.rs/) for collision handling
+
+A neat unique thing here, compared to other three-body simulations, is that collisions are handled elastically.
 
 ## Table of Contents
 
