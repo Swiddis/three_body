@@ -1,18 +1,21 @@
 use std::f64::consts::PI;
 
 use rapier3d_f64::prelude::*;
-use kiss3d::nalgebra::Translation3;
 
-use crate::config::{ThreeBodyConfig, Body};
-use crate::graphics::init;
+use crate::config::{Body, ThreeBodyConfig};
+use crate::graphics::{draw_bodies, init};
 
 struct PhysicsBody {
     handle: RigidBodyHandle,
     mass: f64,
-    translation: Vector<Real>
+    translation: Vector<Real>,
 }
 
-fn add_bodies(rigid_body_set: &mut RigidBodySet, collider_set: &mut ColliderSet, bodies: &Vec<Body>) {
+fn add_bodies(
+    rigid_body_set: &mut RigidBodySet,
+    collider_set: &mut ColliderSet,
+    bodies: &Vec<Body>,
+) {
     for body in bodies {
         let radius = (body.mass * 3.0 / (4.0 * PI)).cbrt();
         let rigid_body = RigidBodyBuilder::dynamic()
@@ -20,18 +23,24 @@ fn add_bodies(rigid_body_set: &mut RigidBodySet, collider_set: &mut ColliderSet,
             .linvel(vector![body.velocity.x, body.velocity.y, body.velocity.z])
             .ccd_enabled(true)
             .build();
-        let collider = ColliderBuilder::ball(radius).restitution(1.0).density(1.0).build();
+        let collider = ColliderBuilder::ball(radius)
+            .restitution(1.0)
+            .density(1.0)
+            .build();
         let handle = rigid_body_set.insert(rigid_body);
         collider_set.insert_with_parent(collider, handle, rigid_body_set);
     }
 }
 
 fn get_bodies(rigid_body_set: &RigidBodySet) -> Vec<PhysicsBody> {
-    rigid_body_set.iter().map(|body| PhysicsBody {
-        handle: body.0,
-        mass: body.1.mass(),
-        translation: body.1.translation().clone()
-    }).collect()
+    rigid_body_set
+        .iter()
+        .map(|body| PhysicsBody {
+            handle: body.0,
+            mass: body.1.mass(),
+            translation: body.1.translation().clone(),
+        })
+        .collect()
 }
 
 fn calculate_forces(rigid_body_set: &mut RigidBodySet, grav_const: &f64) {
@@ -53,7 +62,11 @@ pub fn do_physics(config: ThreeBodyConfig) {
     let mut rigid_body_set = RigidBodySet::new();
     let mut collider_set = ColliderSet::new();
 
-    add_bodies(&mut rigid_body_set, &mut collider_set, &config.universe.bodies);
+    add_bodies(
+        &mut rigid_body_set,
+        &mut collider_set,
+        &config.universe.bodies,
+    );
 
     let gravity = vector![0.0, 0.0, 0.0];
     let integration_parameters = IntegrationParameters::default();
@@ -68,6 +81,7 @@ pub fn do_physics(config: ThreeBodyConfig) {
     let event_handler = ();
 
     let (mut window, mut graphics) = init(&config.universe.bodies);
+
     while window.render() {
         calculate_forces(&mut rigid_body_set, &config.universe.grav_const);
         physics_pipeline.step(
@@ -84,14 +98,6 @@ pub fn do_physics(config: ThreeBodyConfig) {
             &physics_hooks,
             &event_handler,
         );
-
-        for (i, body) in rigid_body_set.iter().enumerate() {
-            let b_trans = body.1.position().translation.vector;
-            let b_trans: Vec<f32> = b_trans.iter().map(|f| *f as f32).collect();
-            let s_trans: Translation3<f32> = Translation3 {
-                vector: kiss3d::nalgebra::Vector3::new(b_trans[0], b_trans[1], b_trans[2])
-            };
-            graphics[i].sphere.set_local_translation(s_trans);
-        }
+        draw_bodies(&rigid_body_set, &mut graphics);
     }
 }
