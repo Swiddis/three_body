@@ -1,30 +1,30 @@
 universe:
-  grav_const: 20.0
+  grav_const: 50.0
   bodies:
     - mass: 100.0
       position:
-        x: 20.0
-        y: 0.0
+        x: -25.0
+        y: 5.0
         z: 0.0
       velocity:
         x: 0.0
-        y: 8.0
-        z: -5.0
+        y: -5.41332
+        z: 15.81139
     - mass: 100.0
       position:
-        x: -20.0
-        y: 0.0
+        x: -25.0
+        y: -5.0
         z: 0.0
       velocity:
         x: 0.0
-        y: -8.0
-        z: -5.0
+        y: -5.41332
+        z: -15.81139
     - mass: 100.0
       position:
-        x: 0.0
+        x: 50.0
         y: 0.0
         z: 0.0
       velocity:
         x: 0.0
-        y: 0.0
-        z: 10.0
+        y: 10.82664
+        z: 0.0
