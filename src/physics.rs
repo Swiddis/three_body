@@ -1,9 +1,10 @@
 use std::f64::consts::PI;
 
 use rapier3d_f64::prelude::*;
+use kiss3d::window::Window;
 
 use crate::config::{Body, ThreeBodyConfig};
-use crate::graphics::{draw_bodies, init};
+use crate::graphics::{draw_bodies, init, GraphicsBody};
 
 struct PhysicsBody {
     handle: RigidBodyHandle,
@@ -111,20 +112,21 @@ fn calculate_forces(rigid_body_set: &mut RigidBodySet, grav_const: &f64) {
     }
 }
 
-pub fn do_physics(config: ThreeBodyConfig) {
+fn setup_simulation(config: &ThreeBodyConfig) -> (Physics, Window, Vec<GraphicsBody>) {
     let mut rigid_body_set = RigidBodySet::new();
     let mut collider_set = ColliderSet::new();
-
     add_bodies(
         &mut rigid_body_set,
         &mut collider_set,
         &config.universe.bodies,
     );
+    let physics = Physics::new(rigid_body_set, collider_set);
+    let (window, graphics) = init(&config.universe.bodies);
+    return (physics, window, graphics);
+}
 
-    let mut physics = Physics::new(rigid_body_set, collider_set);
-
-    let (mut window, mut graphics) = init(&config.universe.bodies);
-
+pub fn do_simulation(config: ThreeBodyConfig) {
+    let (mut physics, mut window, mut graphics) = setup_simulation(&config);
     while window.render() {
         calculate_forces(&mut physics.bodies, &config.universe.grav_const);
         physics.step();
