@@ -1,8 +1,6 @@
-use std::f64::consts::PI;
-
+use config::ConfigError;
 use kiss3d::window::Window;
 use rapier3d_f64::prelude::*;
-use ::config::ConfigError;
 
 use crate::config::{Body, ThreeBodyConfig};
 use crate::graphics::{draw_bodies, init, GraphicsBody};
@@ -73,15 +71,16 @@ fn add_bodies(
 ) -> Result<(), ConfigError> {
     for body in bodies {
         if body.mass <= 0.0 {
-            return Err(ConfigError::Message("body mass must be positive".to_owned()));
+            return Err(ConfigError::Message(
+                "body mass must be positive".to_owned(),
+            ));
         }
-        let radius = (body.mass * 3.0 / (4.0 * PI)).cbrt();
         let rigid_body = RigidBodyBuilder::dynamic()
             .translation(vector![body.position.x, body.position.y, body.position.z])
             .linvel(vector![body.velocity.x, body.velocity.y, body.velocity.z])
             .ccd_enabled(true)
             .build();
-        let collider = ColliderBuilder::ball(radius)
+        let collider = ColliderBuilder::ball(body.radius())
             .restitution(1.0)
             .mass(body.mass)
             .friction(0.0)
@@ -118,7 +117,9 @@ fn calculate_forces(rigid_body_set: &mut RigidBodySet, grav_const: &f64) {
     }
 }
 
-fn setup_simulation(config: &ThreeBodyConfig) -> Result<(Physics, Window, Vec<GraphicsBody>), ConfigError> {
+fn setup_simulation(
+    config: &ThreeBodyConfig,
+) -> Result<(Physics, Window, Vec<GraphicsBody>), ConfigError> {
     let mut rigid_body_set = RigidBodySet::new();
     let mut collider_set = ColliderSet::new();
     add_bodies(

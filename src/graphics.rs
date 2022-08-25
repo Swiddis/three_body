@@ -7,8 +7,6 @@ use rapier3d_f64::prelude::RigidBodySet;
 
 use crate::config::Body;
 
-use std::f64::consts::PI;
-
 pub struct GraphicsBody {
     pub sphere: SceneNode,
 }
@@ -19,9 +17,8 @@ pub fn init(cfg_bodies: &Vec<Body>) -> (Window, Vec<GraphicsBody>) {
     window.set_light(Light::StickToCamera);
 
     for body in cfg_bodies.iter() {
-        let radius = (body.mass * 3.0 / (4.0 * PI)).cbrt();
-        let color = (body.color.r as f32 / 255.0, body.color.g as f32 / 255.0, body.color.b as f32 / 255.0);
-        let mut s = window.add_sphere(radius as f32);
+        let color: (f32, f32, f32) = body.color.into();
+        let mut s = window.add_sphere(body.radius() as f32);
         s.set_color(color.0, color.1, color.2);
 
         bodies.push(GraphicsBody { sphere: s });
