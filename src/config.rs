@@ -9,10 +9,18 @@ pub struct Vector3 {
 }
 
 #[derive(Deserialize)]
+pub struct ColorRGB {
+    pub r: i32,
+    pub g: i32,
+    pub b: i32,
+}
+
+#[derive(Deserialize)]
 pub struct Body {
     pub mass: f64,
     pub position: Vector3,
     pub velocity: Vector3,
+    pub color: ColorRGB,
 }
 
 #[derive(Deserialize)]

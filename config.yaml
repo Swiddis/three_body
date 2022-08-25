@@ -10,6 +10,10 @@ universe:
         x: 0.0
         y: -5.41332
         z: 15.81139
+      color:
+        r: 255
+        g: 128
+        b: 128
     - mass: 100.0
       position:
         x: -25.0
@@ -19,6 +23,10 @@ universe:
         x: 0.0
         y: -5.41332
         z: -15.81139
+      color:
+        r: 128
+        g: 255
+        b: 128
     - mass: 100.0
       position:
         x: 50.0
@@ -28,3 +36,7 @@ universe:
         x: 0.0
         y: 10.82664
         z: 0.0
+      color:
+        r: 128
+        g: 128
+        b: 255
