@@ -10,7 +10,6 @@ Built with:
 
 - [Kiss3d](https://crates.io/crates/kiss3d) for graphics
 - [Rapier](https://rapier.rs/) for physics
-- [Parry](https://parry.rs/) for collision handling
 
 A neat unique thing here, compared to other three-body simulations, is that collisions are handled elastically.
 

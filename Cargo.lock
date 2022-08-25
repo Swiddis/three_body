@@ -1942,7 +1942,6 @@ version = "1.2.0"
 dependencies = [
  "config",
  "kiss3d",
- "parry3d-f64",
  "rapier3d-f64",
  "serde",
 ]
